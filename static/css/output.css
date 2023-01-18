@@ -1,0 +1,59 @@
+/*
+Theme Name: UCF Athena Child (RICHES)
+Theme URL: https://riches.cah.ucf.edu/
+Description: A UCF Athena child theme for the RICHES project
+Author: Kirk Lundblade
+Author URL: http://kirklundblade.com
+Template: ucf
+Version: 1.0.0
+Text Domain: ucf-child-riches
+*/
+#banner-holder img {
+  width: 100%;
+  position: relative;
+  overflow: hidden; }
+
+.media-background-container a {
+  color: #000000;
+  border-color: #000000; }
+.media-background-container a:hover {
+  color: #ffffff;
+  border-color: #000000;
+  text-decoration: none; }
+
+aside .fas {
+  font-size: 6rem !important; }
+aside h2 {
+  margin-bottom: 2rem; }
+
+.riches-collections {
+  background-color: #eceeef;
+  padding-top: 3rem;
+  padding-bottom: 3rem; }
+  .riches-collections .container {
+    margin-bottom: 0px !important; }
+  .riches-collections .card {
+    background-color: #ffffff;
+    border: none; }
+  .riches-collections h2 {
+    margin-bottom: 2rem; }
+
+.riches-footer {
+  background-color: #3e3e3e;
+  color: #ffffff;
+  text-align: center;
+  font-size: 2.5rem; }
+  .riches-footer .riches-title {
+    font-size: 1.85rem; }
+  .riches-footer .riches-subtitle,
+  .riches-footer .address {
+    font-size: .7rem; }
+  .riches-footer ul {
+    list-style-type: none;
+    padding: 0 0 0 0; }
+    .riches-footer ul li {
+      display: inline-block; }
+  .riches-footer .fab:hover {
+    opacity: 0.5; }
+
+/*# sourceMappingURL=output.css.map */
