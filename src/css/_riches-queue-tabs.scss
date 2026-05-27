@@ -1,0 +1,65 @@
+// Tabbed queue shortcode (.riches-queue-tabs)
+.riches-queue-tabs {
+    &__toolbar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    &__nav {
+        flex-wrap: nowrap;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        min-height: 2.75rem;
+
+        .nav-item {
+            flex: 0 0 auto;
+        }
+
+        .nav-link {
+            white-space: nowrap;
+            font-weight: 600;
+            padding: 0.5rem 0.85rem;
+        }
+    }
+
+    &__collections {
+        margin-top: 0;
+    }
+
+    // Standalone .riches-collections is content-height (see input.scss). Tabbed markup has
+    // .container > .tab-content only (no h2); these rules keep panes and card-deck from collapsing.
+    &__collections.riches-collections {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+
+        > .container {
+            display: block;
+            height: auto;
+            min-height: 0;
+            flex: unset;
+        }
+
+        .tab-content {
+            display: block;
+            padding-bottom: 1rem;
+
+            .tab-pane {
+                padding-top: 1rem;
+                outline: none;
+            }
+        }
+
+        .card-deck {
+            height: auto !important;
+            min-height: 0;
+        }
+
+        .card {
+            min-height: 0;
+        }
+    }
+
+    &__empty {
+        margin-bottom: 0;
+    }
+}

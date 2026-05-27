@@ -15,7 +15,7 @@
 	<div class="container mt-4 mt-sm-5 mb-5 pb-sm-4">
 		<h2>Recently-Added Collections</h2>
 		<div class='card-deck mb-3'>
-		<?php 
+		<?php
 		/*
 		$gallery_shortcode = '[gallery id="' . intval( $post->post_parent ) . '"]';
 			print apply_filters( 'the_content', $gallery_shortcode );
@@ -27,11 +27,11 @@
 			'order' => 'DESC' ,
 			'posts_per_page' => 3,
 			'paged' => get_query_var('paged')
-		); 
+		);
 		$q = new WP_Query($args);
 		$i=0;
-		
-		if ( $q->have_posts() && $i <= 3) { 
+
+		if ( $q->have_posts() && $i <= 3) {
 			while ( $q->have_posts() ) {
 				$q->the_post();
 				// your loop ?>
@@ -45,7 +45,7 @@
 						<p class='card text'><?php the_time( 'F j, Y' ); ?></p>
 					</div>
 				</div>
-			
+
 			<?php $i++;
 			}
 		}

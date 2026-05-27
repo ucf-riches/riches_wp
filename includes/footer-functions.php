@@ -22,11 +22,11 @@ if ( !function_exists( 'richeswp_get_footer_markup' ) ) {
 				<div class="row">
 					<section class="col-12 col-lg">
 						
-						<h2 class="riches-title">RICHES of Central Florida</h2>
-						<p class="riches-subtitle">Regional Initiative for Collecting the History, Experiences and Stories</p>
+						<h2 class="riches-title">RICHES Digital Archival Project</h2>
+						<!--<p class="riches-subtitle">Regional Initiative for Collecting the History, Experiences and Stories</p>-->
 						<ul>
 							<li><a href="https://www.facebook.com/RICHESMosaicInterface/" class=""><span class="fab fa-facebook-square"></span></a></li>
-							<li><a href="https://twitter.com/RichesMI" class=""><span class="fab fa-twitter-square"></span></a></li>
+							<!--<li><a href="https://twitter.com/RichesMI" class=""><span class="fab fa-twitter-square"></span></a></li>-->
 							<li><a href="https://www.youtube.com/channel/UCLgfZLqLwE6M2yUyeOp0IQA" class=""><span class="fab fa-youtube-square"></span></a></li>
 							<!--<li><a href="" class=""><span class="fab fa-pinterest-square"></span></a></li>-->
 						</ul>

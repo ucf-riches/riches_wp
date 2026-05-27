@@ -17,7 +17,7 @@
 		if ( get_page_template_slug( $post->ID )=="template-home.php" && has_post_thumbnail() ) { echo $image[0]; } else { echo $bgimage; } ?> )"></div>
 	</div>
 	<header class="site-header">
-		<?php ?>
+		<?php richeswp_the_sticky_nav(); ?>
 	</header>
 
 	<main class="site-main">

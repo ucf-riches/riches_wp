@@ -4,9 +4,14 @@
 
 
 include_once 'includes/header-functions.php';
+include_once 'includes/nav-functions.php';
 include_once 'includes/footer-functions.php';
 include_once 'includes/config.php';
 include_once 'includes/shortcodes.php';
+include_once 'includes/map-pins-register.php';
+include_once 'includes/map-pins-acf.php';
+include_once 'includes/map-pins-assets.php';
+include_once 'includes/map-pins-admin.php';
 
 /*
 add_action('wp_enqueue_scripts', 'riches_theme_enqueue_style', 10, 0);
