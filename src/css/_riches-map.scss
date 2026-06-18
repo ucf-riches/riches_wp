@@ -161,12 +161,16 @@
     border-radius: 3px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-size: 0.8125rem;
-    line-height: 1.35;
-    max-width: min(40rem, calc(100vw - 3rem));
-    width: max-content;
-    padding: 0.35rem 0.5rem;
-    white-space: normal;
+    line-height: 1.4;
+    // Fixed rem width — avoids the circular-ref collapse that happens when using
+    // calc(100%) inside Leaflet's unsized absolute tooltip pane.
+    // ~18rem ≈ 288px ≈ 28% of a 1024px map; at this width most 40–80 char
+    // teasers wrap to 2–3 lines, giving roughly the requested 2:1 shape.
+    width: 18rem;
+    padding: 0.4rem 0.6rem;
+    white-space: normal !important; // override Leaflet's nowrap default
     word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .leaflet-container {

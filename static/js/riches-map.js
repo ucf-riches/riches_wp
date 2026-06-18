@@ -127,7 +127,7 @@
 
 			if (pin.teaser) {
 				marker.bindTooltip(escapeHtml(pin.teaser), {
-					direction: 'top',
+					direction: 'auto',
 					offset: [0, -8],
 					className:
 						'riches-map-tooltip riches-map-tooltip--' + (pin.category || 'other'),
