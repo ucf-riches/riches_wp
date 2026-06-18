@@ -1,5 +1,5 @@
 /**
- * RICHES Leaflet map embed (reads data-riches-map-config on .riches-map).
+ * RICHES Leaflet map embed (reads .riches-map__config script element on .riches-map).
  */
 (function () {
 	'use strict';
@@ -7,12 +7,12 @@
 	var HOVER_MEDIA = window.matchMedia('(hover: hover)');
 
 	function parseConfig(el) {
-		var raw = el.getAttribute('data-riches-map-config');
-		if (!raw) {
+		var scriptEl = el.querySelector('.riches-map__config');
+		if (!scriptEl) {
 			return null;
 		}
 		try {
-			return JSON.parse(raw);
+			return JSON.parse(scriptEl.textContent);
 		} catch (e) {
 			return null;
 		}
@@ -162,12 +162,6 @@
 			bounds.push([pin.lat, pin.lng]);
 		});
 
-		if (bounds.length > 1) {
-			map.fitBounds(bounds, { padding: [40, 40], maxZoom: config.zoom || 12 });
-		} else if (bounds.length === 1) {
-			map.setView(bounds[0], config.zoom || 14);
-		}
-
 		map.on('click', closePanel);
 
 		if (panelClose) {
@@ -185,6 +179,11 @@
 
 		setTimeout(function () {
 			map.invalidateSize();
+			if (bounds.length > 1) {
+				map.fitBounds(bounds, { padding: [40, 40], maxZoom: config.zoom || 12 });
+			} else if (bounds.length === 1) {
+				map.setView(bounds[0], config.zoom || 14);
+			}
 		}, 100);
 	}
 
@@ -204,7 +203,7 @@
 	}
 
 	function boot() {
-		var roots = document.querySelectorAll('.riches-map[data-riches-map-config]');
+		var roots = document.querySelectorAll('.riches-map');
 		for (var i = 0; i < roots.length; i++) {
 			initMap(roots[i]);
 		}

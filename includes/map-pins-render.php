@@ -69,7 +69,6 @@ function riches_map_get_map_post_by_slug( $slug ) {
 			'post_status'            => 'publish',
 			'posts_per_page'         => 1,
 			'no_found_rows'          => true,
-			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		)
 	);
@@ -183,7 +182,6 @@ function riches_map_query_pins_for_slug( $map_slug ) {
 			'orderby'                => 'title',
 			'order'                  => 'ASC',
 			'no_found_rows'          => true,
-			'update_post_meta_cache' => false,
 			'meta_query'             => array(
 				array(
 					'key'     => 'pin_map_slug',
@@ -391,7 +389,7 @@ function riches_map_shortcode( $atts ) {
 	riches_map_mark_embed_present( $slug );
 
 	$instance_id = 'riches-map-' . substr( md5( wp_json_encode( $config ) . (string) wp_rand() ), 0, 8 );
-	$json        = wp_json_encode( $config );
+	$json        = wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP );
 	if ( ! $json ) {
 		return '';
 	}
@@ -425,9 +423,9 @@ function riches_map_shortcode( $atts ) {
 	<div
 		class="<?php echo esc_attr( implode( ' ', $map_classes ) ); ?>"
 		id="<?php echo esc_attr( $instance_id ); ?>"
-		data-riches-map-config="<?php echo esc_attr( $json ); ?>"
 		style="--riches-map-height: <?php echo esc_attr( $config['height'] ); ?>;"
 	>
+		<script type="application/json" class="riches-map__config"><?php echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON_HEX_TAG|JSON_HEX_AMP prevent </script> injection ?></script>
 		<div class="riches-map__canvas" role="region" aria-label="<?php echo esc_attr( $config['title'] ); ?>"></div>
 		<div class="riches-map__panel" hidden aria-live="polite">
 			<button type="button" class="riches-map__panel-close" aria-label="<?php esc_attr_e( 'Close', 'UCF-WordPress-Theme-child-RICHES' ); ?>">&times;</button>

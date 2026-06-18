@@ -80,6 +80,7 @@ function riches_register_map_pin_category_taxonomy() {
 			'public'            => false,
 			'show_ui'           => true,
 			'show_admin_column' => true,
+			'meta_box_cb'       => false,
 			'hierarchical'      => false,
 			'rewrite'           => false,
 			'show_in_rest'      => true,

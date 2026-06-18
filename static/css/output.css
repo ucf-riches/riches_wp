@@ -395,8 +395,11 @@ article.post-list-item {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   font-size: 0.8125rem;
   line-height: 1.35;
-  max-width: 14rem;
+  max-width: min(40rem, 100vw - 3rem);
+  width: max-content;
   padding: 0.35rem 0.5rem;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .leaflet-container {
