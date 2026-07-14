@@ -25,6 +25,34 @@ function riches_shortcode_reduced_flag( $value ) {
 }
 
 /**
+ * Parse a truthy/falsy shortcode attribute, returning $default when unset/blank.
+ *
+ * Accepts 1/true/yes/on (true) and 0/false/no/off (false), case-insensitive.
+ *
+ * @param mixed $value   Raw attribute value.
+ * @param bool  $default Value to use when the attribute is absent or empty.
+ * @return bool
+ */
+function riches_shortcode_bool_flag( $value, $default = true ) {
+	if ( null === $value || '' === $value ) {
+		return $default;
+	}
+	if ( is_bool( $value ) ) {
+		return $value;
+	}
+	if ( is_string( $value ) ) {
+		$v = strtolower( trim( $value ) );
+		if ( in_array( $v, array( '0', 'false', 'no', 'off' ), true ) ) {
+			return false;
+		}
+		if ( in_array( $v, array( '1', 'true', 'yes', 'on' ), true ) ) {
+			return true;
+		}
+	}
+	return (bool) $value;
+}
+
+/**
  * Render a category queue as a card deck (and optional section heading).
  *
  * @param array $args {
@@ -47,6 +75,7 @@ function riches_render_category_queue( $args ) {
 		'reduced'           => false,
 		'wrap_collections'  => true,
 		'include_container' => true,
+		'link_titles'       => true,
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -66,6 +95,7 @@ function riches_render_category_queue( $args ) {
 	$show_heading       = $reduced ? false : (bool) $args['show_heading'];
 	$wrap_collections   = (bool) $args['wrap_collections'];
 	$include_container  = (bool) $args['include_container'];
+	$link_titles        = (bool) $args['link_titles'];
 	$cat                = get_category_by_slug( $slug );
 	$cat_link           = $cat ? get_category_link( $cat->term_id ) : null;
 
@@ -133,14 +163,20 @@ function riches_render_category_queue( $args ) {
 									<p><?php the_title(); ?></p>
 								</div>
 							</a>
+							<?php riches_render_omeka_bar( get_the_ID() ); ?>
 							<div class="card-block">
 								<p class="card-text text-muted"><?php the_time( 'F j, Y' ); ?></p>
 							</div>
 						<?php else : ?>
 							<?php the_post_thumbnail( 'large', array( 'class' => 'card-img-top' ) ); ?>
+							<?php riches_render_omeka_bar( get_the_ID() ); ?>
 							<div class="card-block">
 								<h4 class="card-title">
-									<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+									<?php if ( $link_titles ) : ?>
+										<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+									<?php else : ?>
+										<?php the_title(); ?>
+									<?php endif; ?>
 								</h4>
 								<p class="card-text"><?php the_excerpt(); ?></p>
 								<p class="card-text text-muted"><?php the_time( 'F j, Y' ); ?></p>

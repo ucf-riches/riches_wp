@@ -39,6 +39,7 @@
 					<!--<img class='card-img-top' src='<?php print $temp ?>' alt='featured collection'>-->
 					<?php $sizing = array(350, 350);
 					the_post_thumbnail($sizing); ?>
+					<?php riches_render_omeka_bar( get_the_ID() ); ?>
 					<div class='card-block'>
 						<h4 class='card-title'><?php the_title(); ?></h4>
 						<p class='card text'><?php the_excerpt(); ?></p>

@@ -165,6 +165,26 @@ article.post-list-item {
             min-width: 0;
         }
 
+        // Full-width "View in Omeka" bar between the image and the body text.
+        // flex: 0 0 auto (mirrors > img) so it takes natural height and never
+        // stretches or compresses in the flex-column card. The bar is flush to
+        // the card edges (no padding) so it spans the full card width like the
+        // image above it.
+        .riches-omeka-bar {
+            flex: 0 0 auto;
+            min-height: 0;
+            padding: 0;
+
+            .riches-omeka-bar__link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+                width: 100%;
+                border-radius: 0; // square corners so it reaches the card edges
+            }
+        }
+
         .card-text {
             overflow-wrap: anywhere;
             word-break: break-word;

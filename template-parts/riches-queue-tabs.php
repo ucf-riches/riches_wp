@@ -74,6 +74,7 @@ if ( empty( $queues ) ) {
 							'reduced'           => ! empty( $row['reduced'] ),
 							'wrap_collections'  => false,
 							'include_container' => false,
+							'link_titles'       => ! isset( $row['link_titles'] ) || ! empty( $row['link_titles'] ),
 						)
 					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>

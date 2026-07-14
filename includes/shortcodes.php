@@ -9,6 +9,7 @@
 require_once dirname( __FILE__ ) . '/category-queue.php';
 require_once dirname( __FILE__ ) . '/queue-tabs.php';
 require_once dirname( __FILE__ ) . '/map-pins-render.php';
+require_once dirname( __FILE__ ) . '/omeka-link.php';
 
 //[bannerstrip ]
 function insert_bannerstrip( $atts ) {
@@ -85,6 +86,7 @@ function riches_category_row( $atts ) {
 			'label'          => '',
 			'posts_per_page' => 3,
 			'reduced'        => '',
+			'link_titles'    => '',
 		),
 		$atts,
 		'riches_category_row'
@@ -106,6 +108,7 @@ function riches_category_row( $atts ) {
 			'reduced'           => $reduced,
 			'wrap_collections'  => true,
 			'include_container' => true,
+			'link_titles'       => riches_shortcode_bool_flag( $a['link_titles'], true ),
 		)
 	);
 }

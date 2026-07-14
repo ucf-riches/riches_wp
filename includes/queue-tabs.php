@@ -38,13 +38,17 @@ function riches_queue_tabs_parse_nested_rows( $content ) {
 		$ppp   = isset( $atts['posts_per_page'] ) ? absint( $atts['posts_per_page'] ) : 3;
 		$reduced_explicit = isset( $atts['reduced'] );
 		$reduced            = $reduced_explicit ? riches_shortcode_reduced_flag( $atts['reduced'] ) : false;
+		$link_titles_explicit = isset( $atts['link_titles'] );
+		$link_titles          = $link_titles_explicit ? riches_shortcode_bool_flag( $atts['link_titles'], true ) : true;
 
 		$queues[] = array(
-			'category'           => $slug,
-			'label'              => $label,
-			'posts_per_page'     => $ppp > 0 ? $ppp : 3,
-			'reduced'            => $reduced,
-			'reduced_explicit'   => $reduced_explicit,
+			'category'             => $slug,
+			'label'                => $label,
+			'posts_per_page'       => $ppp > 0 ? $ppp : 3,
+			'reduced'              => $reduced,
+			'reduced_explicit'     => $reduced_explicit,
+			'link_titles'          => $link_titles,
+			'link_titles_explicit' => $link_titles_explicit,
 		);
 	}
 
@@ -97,9 +101,10 @@ add_filter( 'body_class', 'riches_queue_tabs_body_class' );
 function riches_queue_tabs_shortcode( $atts, $content = null ) {
 	$a = shortcode_atts(
 		array(
-			'default' => '',
-			'id'      => '',
-			'reduced' => '',
+			'default'     => '',
+			'id'          => '',
+			'reduced'     => '',
+			'link_titles' => '',
 		),
 		$atts,
 		'riches_queue_tabs'
@@ -113,17 +118,19 @@ function riches_queue_tabs_shortcode( $atts, $content = null ) {
 		return '';
 	}
 
-	if ( riches_shortcode_reduced_flag( $a['reduced'] ) ) {
-		foreach ( $queues as $i => $row ) {
-			if ( empty( $row['reduced_explicit'] ) ) {
-				$queues[ $i ]['reduced'] = true;
-			}
-			unset( $queues[ $i ]['reduced_explicit'] );
+	// Wrapper-level toggles cascade to nested rows that did not set their own.
+	$wrapper_reduced     = riches_shortcode_reduced_flag( $a['reduced'] );
+	$wrapper_link_set    = ( '' !== $a['link_titles'] );
+	$wrapper_link_titles = riches_shortcode_bool_flag( $a['link_titles'], true );
+
+	foreach ( $queues as $i => $row ) {
+		if ( $wrapper_reduced && empty( $row['reduced_explicit'] ) ) {
+			$queues[ $i ]['reduced'] = true;
 		}
-	} else {
-		foreach ( $queues as $i => $row ) {
-			unset( $queues[ $i ]['reduced_explicit'] );
+		if ( $wrapper_link_set && empty( $row['link_titles_explicit'] ) ) {
+			$queues[ $i ]['link_titles'] = $wrapper_link_titles;
 		}
+		unset( $queues[ $i ]['reduced_explicit'], $queues[ $i ]['link_titles_explicit'] );
 	}
 
 	$default_slug = sanitize_key( $a['default'] );
