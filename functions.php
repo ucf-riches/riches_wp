@@ -12,6 +12,7 @@ include_once 'includes/map-pins-register.php';
 include_once 'includes/map-pins-acf.php';
 include_once 'includes/map-pins-assets.php';
 include_once 'includes/map-pins-admin.php';
+include_once 'includes/aggregator.php';
 
 /*
 add_action('wp_enqueue_scripts', 'riches_theme_enqueue_style', 10, 0);

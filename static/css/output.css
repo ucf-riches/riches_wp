@@ -442,3 +442,48 @@ article.post-list-item {
 .riches-footer .fab:hover {
   opacity: 0.5;
 }
+
+/* Aggregator page template (compiled from src/css/_riches-aggregator.scss). */
+.riches-aggregator__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.riches-aggregator__field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+.riches-aggregator__field label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+.riches-aggregator__field select,
+.riches-aggregator__field input {
+  width: 100%;
+}
+.riches-aggregator__status {
+  flex-basis: 100%;
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+.riches-aggregator__card--hidden {
+  display: none !important;
+}
+.riches-aggregator__empty {
+  display: none;
+}
+.riches-aggregator.riches-aggregator--empty .riches-aggregator__empty {
+  display: block;
+}
+@media (max-width: 575.98px) {
+  .riches-aggregator__field {
+    flex-basis: 100%;
+  }
+}
