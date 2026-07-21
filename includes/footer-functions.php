@@ -7,7 +7,7 @@
  * Returns markup for the site footer. Will return an empty string if all
  * footer sidebars are empty.
  *
- * @author Jo Dickson
+ * @author Kirk Lundblade
  * @since 1.0.0
  * @return string Footer HTML markup
  **/

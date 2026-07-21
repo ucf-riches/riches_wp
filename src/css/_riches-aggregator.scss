@@ -1,7 +1,25 @@
-// Aggregator page template: filter/sort header + card filtering states.
-// Card visuals reuse the shared .riches-collections .card styles.
+// Aggregator page template: filter/sort header + card list.
+//
+// The entry list keeps the .card-deck element (the filter script queries it and
+// re-appends cards into it to sort), but does NOT use Bootstrap's card-deck
+// layout. Bootstrap sets `.card-deck .card { flex: 1 0 0 }` — a zero flex basis,
+// so cards never wrap on content and only the 15px lateral margins force a line
+// break. At ~40 cards per row every card collapses to a few pixels wide and the
+// titles render one letter per line. card-deck is a fixed-small-count component;
+// an aggregator holds an unbounded number of entries, so it is overridden below
+// with a vertical list of horizontal cards.
+//
+// Selectors are prefixed `.riches-aggregator .riches-collections` (0,4,0) so they
+// outrank both `.card-deck .card:not(:first-child)` (0,3,0) in the parent theme
+// and `.riches-collections .card > img` (0,2,1) in input.scss, regardless of
+// stylesheet order, and match nothing outside this page template.
 
 .riches-aggregator {
+    // Width of the media column in a horizontal entry card.
+    --riches-agg-media-w: clamp(11rem, 22vw, 16rem);
+    // Height of the scroll pane holding the entry list (desktop only).
+    --riches-agg-list-max-h: 70vh;
+
     &__controls {
         display: flex;
         flex-wrap: wrap;
@@ -51,8 +69,142 @@
     }
 }
 
+.riches-aggregator .riches-collections {
+    // Vertical list in its own scroll pane, so the filter/sort controls above stay
+    // in view while the entries scroll. The pane is reachable by keyboard through
+    // the links inside each card (focus scrolls it), so no tabindex is needed.
+    .card-deck {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 1rem;
+        max-height: var(--riches-agg-list-max-h);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        padding-right: 0.5rem;
+    }
+
+    // Horizontal entry card: media column + content column.
+    // `grid-template-columns: auto 1fr` collapses the media column to 0 when the
+    // post has neither a featured image nor a YouTube embed — no empty gutter and
+    // no markup change. Rows place the Omeka bar under the text (row 2) even
+    // though it precedes .card-block in the DOM.
+    .card-deck > .card {
+        flex: 0 0 auto;
+        margin-left: 0;
+        margin-right: 0;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: 1fr auto;
+        min-height: 9rem;
+        overflow: hidden;
+    }
+
+    .card-deck > .card > img,
+    .card-deck > .card > .yt-card-link {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        width: var(--riches-agg-media-w);
+        height: 100%;
+        max-height: none; // reset the queue-card media clamp
+        aspect-ratio: auto; // height is driven by the card row instead
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .card-deck > .card > .card-block {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-width: 0;
+        padding: 1rem 1.25rem;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.05rem;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // the_excerpt() emits its own <p>, which the parser lifts out of the wrapping
+    // <p class="card-text"> — so the excerpt is an unclassed sibling here, and the
+    // leftover wrapper is empty. Target the children of .card-block directly.
+    .card-deck > .card > .card-block > p {
+        margin: 0;
+
+        &:empty {
+            display: none;
+        }
+
+        &:not(.text-muted) {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        &.text-muted {
+            margin-top: auto; // pin the date to the bottom of the content column
+            font-size: 0.85rem;
+        }
+    }
+
+    // Sits below the text rather than spanning the card, and stays its natural width.
+    .card-deck > .card > .riches-omeka-bar {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 0 1.25rem 1rem;
+
+        .riches-omeka-bar__link {
+            display: inline-flex;
+            width: auto;
+            border-radius: 0.25rem;
+        }
+    }
+}
+
 @media (max-width: 575.98px) {
     .riches-aggregator__field {
         flex-basis: 100%;
+    }
+
+    // Stack the card and hand scrolling back to the page — a nested scroll pane
+    // is awkward on touch and costs too much of a small viewport.
+    .riches-aggregator .riches-collections {
+        .card-deck {
+            max-height: none;
+            overflow-y: visible;
+            padding-right: 0;
+        }
+
+        .card-deck > .card {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        .card-deck > .card > img,
+        .card-deck > .card > .yt-card-link {
+            grid-column: 1;
+            grid-row: 1;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+        }
+
+        .card-deck > .card > .card-block {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .card-deck > .card > .riches-omeka-bar {
+            grid-column: 1;
+            grid-row: 3;
+        }
     }
 }
