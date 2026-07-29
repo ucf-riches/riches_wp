@@ -56,8 +56,8 @@ function riches_register_aggregator_fields() {
 					'load_terms'    => 0,
 					'return_format' => 'object',
 					'allow_null'    => 1,
-					'required'      => 1,
-					'instructions'  => __( 'The pool: this category and all of its child categories.', 'UCF-WordPress-Theme-child-RICHES' ),
+					'required'      => 0,
+					'instructions'  => __( 'The pool: this category and all of its child categories. Ignored on the Posts page, which pools all posts.', 'UCF-WordPress-Theme-child-RICHES' ),
 				),
 				array(
 					'key'           => 'field_riches_agg_show_search',
@@ -120,6 +120,7 @@ function riches_register_aggregator_fields() {
 				),
 			),
 			'location'              => array(
+				// Aggregator template pages …
 				array(
 					array(
 						'param'    => 'post_type',
@@ -130,6 +131,14 @@ function riches_register_aggregator_fields() {
 						'param'    => 'page_template',
 						'operator' => '==',
 						'value'    => RICHES_AGGREGATOR_TEMPLATE,
+					),
+				),
+				// … OR the blog "Posts page" (Settings → Reading), rendered by home.php.
+				array(
+					array(
+						'param'    => 'page_type',
+						'operator' => '==',
+						'value'    => 'posts_page',
 					),
 				),
 			),
@@ -284,26 +293,43 @@ function riches_agg_resolve_source( $source ) {
  * dropdowns, and sort options render only when the page is configured for them.
  *
  * @param array $args {
- *     @type string $category Base category slug (required).
+ *     @type string $category       Base category slug. Pools that category + its
+ *                                  descendants. Ignored when 'all_posts' is true.
+ *     @type bool   $all_posts      Pool every published post (used by home.php for
+ *                                  the blog posts index). Default false.
+ *     @type int    $config_post_id Post/page ID to read the filter/sort ACF config
+ *                                  from. Defaults to the current post (0). The posts
+ *                                  page passes get_option('page_for_posts') here.
  * }
  * @return string HTML fragment (already escaped internally).
  */
 function riches_render_aggregator( $args = array() ) {
-	$args = wp_parse_args( $args, array( 'category' => '' ) );
+	$args = wp_parse_args(
+		$args,
+		array(
+			'category'       => '',
+			'all_posts'      => false,
+			'config_post_id' => 0,
+		)
+	);
 
 	// Read page config up front — the WP_Query loop below rebinds the global post.
-	$page_id     = get_the_ID();
+	$page_id     = $args['config_post_id'] ? (int) $args['config_post_id'] : (int) get_the_ID();
 	$show_search = (bool) riches_aggregator_field( 'riches_agg_show_search', $page_id );
 	$sort_keys   = (array) riches_aggregator_field( 'riches_agg_sorts', $page_id );
 	$raw_filters = (array) riches_aggregator_field( 'riches_agg_filters', $page_id );
 
-	$slug      = sanitize_key( $args['category'] );
-	$base_term = ( '' !== $slug ) ? get_term_by( 'slug', $slug, 'category' ) : false;
-	if ( ! $base_term instanceof WP_Term ) {
-		if ( current_user_can( 'edit_pages' ) ) {
-			return '<p class="text-muted">' . esc_html__( 'Aggregator: choose a Base category in the page editor.', 'UCF-WordPress-Theme-child-RICHES' ) . '</p>';
+	// Resolve the pool: every post, or one base category + its descendants.
+	$base_term = false;
+	if ( ! $args['all_posts'] ) {
+		$slug      = sanitize_key( $args['category'] );
+		$base_term = ( '' !== $slug ) ? get_term_by( 'slug', $slug, 'category' ) : false;
+		if ( ! $base_term instanceof WP_Term ) {
+			if ( current_user_can( 'edit_pages' ) ) {
+				return '<p class="text-muted">' . esc_html__( 'Aggregator: choose a Base category in the page editor.', 'UCF-WordPress-Theme-child-RICHES' ) . '</p>';
+			}
+			return '';
 		}
-		return '';
 	}
 
 	// Resolve the configured filters into a working structure.
@@ -336,23 +362,25 @@ function riches_render_aggregator( $args = array() ) {
 		}
 	}
 
-	$q = new WP_Query(
-		array(
-			'post_type'      => 'post',
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy'         => 'category',
-					'field'            => 'term_id',
-					'terms'            => (int) $base_term->term_id,
-					'include_children' => true,
-				),
-			),
-			'orderby'        => 'date',
-			'order'          => 'DESC',
-			'posts_per_page' => -1,
-			'no_found_rows'  => true,
-		)
+	$query_args = array(
+		'post_type'      => 'post',
+		'post_status'    => 'publish',
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+		'posts_per_page' => -1,
+		'no_found_rows'  => true,
 	);
+	if ( $base_term instanceof WP_Term ) {
+		$query_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			array(
+				'taxonomy'         => 'category',
+				'field'            => 'term_id',
+				'terms'            => (int) $base_term->term_id,
+				'include_children' => true,
+			),
+		);
+	}
+	$q = new WP_Query( $query_args );
 
 	if ( ! $q->have_posts() ) {
 		wp_reset_postdata();
@@ -584,7 +612,8 @@ add_action( 'wp_enqueue_scripts', 'riches_aggregator_register_assets', 5 );
  * Enqueue the filter/sort script only on the aggregator page template.
  */
 function riches_aggregator_enqueue_assets() {
-	if ( ! is_page_template( RICHES_AGGREGATOR_TEMPLATE ) ) {
+	// Aggregator template pages, plus the blog posts index (home.php).
+	if ( ! is_page_template( RICHES_AGGREGATOR_TEMPLATE ) && ! is_home() ) {
 		return;
 	}
 	wp_enqueue_script( 'riches-aggregator-filter' );
