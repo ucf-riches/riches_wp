@@ -82,7 +82,34 @@
         overflow-y: auto;
         overscroll-behavior: contain;
         scrollbar-gutter: stable;
-        padding-right: 0.5rem;
+        padding: 0.75rem;
+        border: 2px solid #adb5bd;
+        border-radius: 8px;
+        box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.1);
+
+        // Prominent scrollbar — Firefox.
+        scrollbar-width: auto;
+        scrollbar-color: #6c757d #dee2e6;
+
+        // Prominent scrollbar — WebKit / Blink.
+        &::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #dee2e6;
+            border-radius: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #868e96;
+            border-radius: 8px;
+            border: 3px solid #dee2e6; // insets the thumb so it reads as a pill
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background: #6c757d;
+        }
     }
 
     // Horizontal entry card: media column + content column.
@@ -97,7 +124,11 @@
         display: grid;
         grid-template-columns: auto 1fr;
         grid-template-rows: 1fr auto;
-        min-height: 9rem;
+        // A DEFINITE height (not just min-height) is what caps the media: it gives
+        // the spanning <img>'s `height: 100%` something to resolve against, so a
+        // tall featured image can no longer inflate the 1fr row and stretch the
+        // card. Cards render as uniform rectangles; overflow clips any excess.
+        height: 12rem;
         overflow: hidden;
     }
 
@@ -107,6 +138,12 @@
         grid-row: 1 / -1;
         width: var(--riches-agg-media-w);
         height: 100%;
+        // A grid item defaults to min-height/min-width: auto, so a tall featured
+        // <img> would force its track (and the whole card) to the image's
+        // intrinsic height. Pin both to 0 so the media follows the card height
+        // set by the text column instead of dictating it.
+        min-height: 0;
+        min-width: 0;
         max-height: none; // reset the queue-card media clamp
         aspect-ratio: auto; // height is driven by the card row instead
         object-fit: cover;
@@ -186,6 +223,7 @@
         .card-deck > .card {
             grid-template-columns: 1fr;
             grid-template-rows: auto 1fr auto;
+            height: auto; // stacked cards grow with content; the desktop cap doesn't apply
         }
 
         .card-deck > .card > img,

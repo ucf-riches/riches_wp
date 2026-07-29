@@ -143,16 +143,10 @@ function riches_render_category_queue( $args ) {
 					 * below the fold never appear and the thumbnail branch is skipped.
 					 */
 					$_post_raw = get_post();
-					$raw_for_yt = ( $_post_raw instanceof WP_Post ) ? $_post_raw->post_content : '';
-					preg_match(
-						'/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
-						$raw_for_yt,
-						$yt_match
-					);
-					$yt_id = isset( $yt_match[1] ) ? $yt_match[1] : null;
+					$yt_id     = riches_youtube_id_from_content( ( $_post_raw instanceof WP_Post ) ? $_post_raw->post_content : '' );
 					?>
 					<div class="card">
-						<?php if ( $yt_id ) : ?>
+						<?php if ( $yt_id && RICHES_USE_YOUTUBE_CARD ) : ?>
 							<?php
 							$yt_url   = 'https://www.youtube.com/watch?v=' . rawurlencode( $yt_id );
 							$yt_thumb = 'https://img.youtube.com/vi/' . rawurlencode( $yt_id ) . '/hqdefault.jpg';

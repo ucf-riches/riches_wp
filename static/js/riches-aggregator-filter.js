@@ -1,10 +1,13 @@
 /**
  * RICHES aggregator: client-side filter + sort for the Aggregator page template.
  *
- * Operates entirely on the server-rendered cards (no AJAX). Reads each card's
- * data-* attributes, then filters (collection / location / search) and sorts
- * (date recorded / name / collection / location / title, asc|desc) by reordering
- * the DOM nodes. Vanilla ES5, no dependencies. Mirrors static/js/riches-map.js.
+ * Operates entirely on the server-rendered cards (no AJAX). The control bar is
+ * built per-page, so this script discovers whatever controls are present:
+ *   - Any number of taxonomy filter dropdowns, each marked [data-filter-taxonomy].
+ *   - A "Sort by" dropdown whose options carry data-sort-type (title | published |
+ *     date_recorded | taxonomy) and, for taxonomy sorts, data-sort-taxonomy.
+ *   - An optional search box and a direction dropdown.
+ * Filtering/sorting reorder the DOM nodes. Vanilla ES5, no dependencies.
  */
 (function () {
 	'use strict';
@@ -15,42 +18,73 @@
 			return;
 		}
 
-		var cards   = Array.prototype.slice.call(root.querySelectorAll('.riches-agg-card'));
-		var search  = root.querySelector('.riches-aggregator__search');
-		var fColl   = root.querySelector('[data-filter="collection"]');
-		var fLoc    = root.querySelector('[data-filter="location"]');
-		var sortSel = root.querySelector('.riches-aggregator__sort');
-		var dirSel  = root.querySelector('.riches-aggregator__dir');
-		var status  = root.querySelector('.riches-aggregator__status');
+		var cards    = Array.prototype.slice.call(root.querySelectorAll('.riches-agg-card'));
+		var search   = root.querySelector('.riches-aggregator__search');
+		var filters  = Array.prototype.slice.call(root.querySelectorAll('[data-filter-taxonomy]'));
+		var sortSel  = root.querySelector('.riches-aggregator__sort');
+		var dirSel   = root.querySelector('.riches-aggregator__dir');
+		var status   = root.querySelector('.riches-aggregator__status');
 
-		var state = { q: '', collection: '', location: '', sortField: 'date', sortDir: 'desc' };
+		// Which taxonomies are referenced by a filter or a taxonomy sort — so we
+		// only read the data-* attributes we actually need.
+		var taxSet = {};
+		filters.forEach(function (sel) {
+			taxSet[sel.getAttribute('data-filter-taxonomy')] = true;
+		});
+		if (sortSel) {
+			Array.prototype.slice.call(sortSel.options).forEach(function (opt) {
+				var t = opt.getAttribute('data-sort-taxonomy');
+				if (t) { taxSet[t] = true; }
+			});
+		}
+		var taxList = Object.keys(taxSet);
+
+		// Current control state. sortType/sortDir seed from the rendered defaults.
+		var firstOpt = sortSel && sortSel.options.length ? sortSel.options[sortSel.selectedIndex] : null;
+		var state = {
+			q: '',
+			filters: {}, // taxonomy => selected slug
+			sortType: firstOpt ? (firstOpt.getAttribute('data-sort-type') || 'title') : 'title',
+			sortTax: firstOpt ? (firstOpt.getAttribute('data-sort-taxonomy') || '') : '',
+			sortDir: dirSel ? dirSel.value : 'asc'
+		};
 
 		// Cache each card's data once.
 		var model = cards.map(function (el) {
-			return {
+			var m = {
 				el: el,
-				name: (el.getAttribute('data-name') || '').toLowerCase(),
 				title: (el.getAttribute('data-title') || '').toLowerCase(),
-				collection: el.getAttribute('data-collection') || '',
-				location: el.getAttribute('data-location-recorded') || '',
-				date: el.getAttribute('data-date-recorded') || ''
+				search: (el.getAttribute('data-search') || ''),
+				published: el.getAttribute('data-published') || '',
+				date: el.getAttribute('data-date-recorded') || '',
+				tax: {},     // taxonomy => array of term slugs
+				taxsort: {}  // taxonomy => first term name (lowercased)
 			};
+			taxList.forEach(function (t) {
+				var raw = el.getAttribute('data-tax-' + t) || '';
+				m.tax[t] = raw ? raw.split(' ') : [];
+				m.taxsort[t] = el.getAttribute('data-taxsort-' + t) || '';
+			});
+			return m;
 		});
 
 		function matches(m) {
-			if (state.collection && m.collection !== state.collection) { return false; }
-			if (state.location && m.location !== state.location) { return false; }
-			if (state.q && m.name.indexOf(state.q) === -1 && m.title.indexOf(state.q) === -1) { return false; }
+			for (var tax in state.filters) {
+				if (!state.filters.hasOwnProperty(tax)) { continue; }
+				var val = state.filters[tax];
+				if (val && m.tax[tax] && m.tax[tax].indexOf(val) === -1) { return false; }
+			}
+			if (state.q && m.search.indexOf(state.q) === -1) { return false; }
 			return true;
 		}
 
 		function sortKey(m) {
-			switch (state.sortField) {
-				case 'name': return m.name;
-				case 'collection': return m.collection.toLowerCase();
-				case 'location': return m.location.toLowerCase();
+			switch (state.sortType) {
 				case 'title': return m.title;
-				default: return m.date; // 'Ymd' string: lexicographic == chronological
+				case 'published': return m.published; // 'Ymd' string: lexicographic == chronological
+				case 'date_recorded': return m.date;  // 'Ymd'
+				case 'taxonomy': return m.taxsort[state.sortTax] || '';
+				default: return m.title;
 			}
 		}
 
@@ -62,18 +96,22 @@
 				if (ok) { shown++; }
 			});
 
-			var dir = state.sortDir === 'asc' ? 1 : -1;
-			var ordered = model.slice().sort(function (a, b) {
-				var ka = sortKey(a), kb = sortKey(b);
-				var ea = ka === '', eb = kb === '';
-				if (ea && eb) { return 0; }
-				if (ea) { return 1; }  // empties always last, regardless of direction
-				if (eb) { return -1; }
-				if (ka < kb) { return -1 * dir; }
-				if (ka > kb) { return 1 * dir; }
-				return 0;
-			});
-			ordered.forEach(function (m) { deck.appendChild(m.el); });
+			// Only reorder when a Sort control exists; otherwise preserve the
+			// server-rendered order (published date, descending).
+			if (sortSel) {
+				var dir = state.sortDir === 'asc' ? 1 : -1;
+				var ordered = model.slice().sort(function (a, b) {
+					var ka = sortKey(a), kb = sortKey(b);
+					var ea = ka === '', eb = kb === '';
+					if (ea && eb) { return 0; }
+					if (ea) { return 1; }  // empties always last, regardless of direction
+					if (eb) { return -1; }
+					if (ka < kb) { return -1 * dir; }
+					if (ka > kb) { return 1 * dir; }
+					return 0;
+				});
+				ordered.forEach(function (m) { deck.appendChild(m.el); });
+			}
 
 			root.classList.toggle('riches-aggregator--empty', shown === 0);
 			if (status) {
@@ -91,12 +129,28 @@
 		}
 
 		if (search) { search.addEventListener('input', onSearch); }
-		if (fColl) { fColl.addEventListener('change', function () { state.collection = fColl.value; apply(); }); }
-		if (fLoc) { fLoc.addEventListener('change', function () { state.location = fLoc.value; apply(); }); }
-		if (sortSel) { sortSel.addEventListener('change', function () { state.sortField = sortSel.value; apply(); }); }
-		if (dirSel) { dirSel.addEventListener('change', function () { state.sortDir = dirSel.value; apply(); }); }
 
-		apply(); // boot: applies the default Date-recorded-desc sort immediately
+		filters.forEach(function (sel) {
+			var tax = sel.getAttribute('data-filter-taxonomy');
+			sel.addEventListener('change', function () {
+				state.filters[tax] = sel.value;
+				apply();
+			});
+		});
+
+		if (sortSel) {
+			sortSel.addEventListener('change', function () {
+				var opt = sortSel.options[sortSel.selectedIndex];
+				state.sortType = opt.getAttribute('data-sort-type') || 'title';
+				state.sortTax = opt.getAttribute('data-sort-taxonomy') || '';
+				apply();
+			});
+		}
+		if (dirSel) {
+			dirSel.addEventListener('change', function () { state.sortDir = dirSel.value; apply(); });
+		}
+
+		apply(); // boot: applies the rendered default sort immediately
 	}
 
 	function boot() {

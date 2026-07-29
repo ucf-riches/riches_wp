@@ -496,7 +496,27 @@ article.post-list-item {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  padding-right: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid #adb5bd;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.1);
+  scrollbar-width: auto;
+  scrollbar-color: #6c757d #dee2e6;
+}
+.riches-aggregator .riches-collections .card-deck::-webkit-scrollbar {
+  width: 14px;
+}
+.riches-aggregator .riches-collections .card-deck::-webkit-scrollbar-track {
+  background: #dee2e6;
+  border-radius: 8px;
+}
+.riches-aggregator .riches-collections .card-deck::-webkit-scrollbar-thumb {
+  background: #868e96;
+  border-radius: 8px;
+  border: 3px solid #dee2e6;
+}
+.riches-aggregator .riches-collections .card-deck::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
 }
 .riches-aggregator .riches-collections .card-deck > .card {
   flex: 0 0 auto;
@@ -505,7 +525,7 @@ article.post-list-item {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;
-  min-height: 9rem;
+  height: 12rem;
   overflow: hidden;
 }
 .riches-aggregator .riches-collections .card-deck > .card > img,
@@ -514,6 +534,8 @@ article.post-list-item {
   grid-row: 1/-1;
   width: var(--riches-agg-media-w);
   height: 100%;
+  min-height: 0;
+  min-width: 0;
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
@@ -575,6 +597,7 @@ article.post-list-item {
   .riches-aggregator .riches-collections .card-deck > .card {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
+    height: auto;
   }
   .riches-aggregator .riches-collections .card-deck > .card > img,
   .riches-aggregator .riches-collections .card-deck > .card > .yt-card-link {
