@@ -25,6 +25,10 @@ Both `functions.php` files load on every request (child first), so the child
 adds and overrides behavior through hooks, filters, and template overrides
 without touching the parent.
 
+> **Maps:** the Leaflet map feature (`[riches_map]`, RICHES Maps / Map Pins post
+> types) lives in the plugin `wp-content/plugins/riches-map/`, not in this theme.
+> Style overrides only, via `.riches-map` selectors in `src/css/`.
+
 ### Entry points
 
 | File | Purpose |
@@ -49,11 +53,6 @@ without touching the parent.
 | `queue-tabs.php` | `[riches_queue_tabs]` tabbed wrapper over multiple category queues |
 | `omeka-link.php` | Omeka/external link bar (URL resolver, per-post overrides, Customizer settings) |
 | `aggregator.php` | Aggregator page template logic: ACF groups, `riches_render_aggregator()`, asset enqueue |
-| `map-pins-register.php` | Map-pin custom post type registration |
-| `map-pins-acf.php` | Map-pin ACF field group |
-| `map-pins-assets.php` | Map-pin asset enqueue (Leaflet + `riches-map.js`) |
-| `map-pins-admin.php` | Map-pin admin column / meta-box helpers |
-| `map-pins-render.php` | Map-pin render helpers |
 
 ### `template-parts/`
 
@@ -64,7 +63,7 @@ without touching the parent.
 
 ### CSS pipeline
 
-Source: `src/css/input.scss` (imports `_riches-queue-tabs.scss`, `_riches-map.scss`,
+Source: `src/css/input.scss` (imports `_riches-queue-tabs.scss` and
 `_riches-aggregator.scss`). Compiled output: **`static/css/output.css`** — this
 is the file that WordPress enqueues. The compiler is the **VS Code Live Sass
 Compiler** extension (not a Node/gulp build; `gulpfile.js` is a stale leftover).
@@ -84,7 +83,6 @@ priority 5 and `wp_enqueue_script` at priority 20 (gated by
 
 | File | Purpose |
 |------|---------|
-| `riches-map.js` | Leaflet map init + pin clustering |
 | `riches-aggregator-filter.js` | Client-side filter/sort for the Aggregator template |
 
 ---

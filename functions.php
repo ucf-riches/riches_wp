@@ -9,10 +9,6 @@ include_once 'includes/footer-functions.php';
 include_once 'includes/config.php';
 include_once 'includes/youtube-featured-image.php';
 include_once 'includes/shortcodes.php';
-include_once 'includes/map-pins-register.php';
-include_once 'includes/map-pins-acf.php';
-include_once 'includes/map-pins-assets.php';
-include_once 'includes/map-pins-admin.php';
 include_once 'includes/aggregator.php';
 
 /*

@@ -8,7 +8,6 @@
 
 require_once dirname( __FILE__ ) . '/category-queue.php';
 require_once dirname( __FILE__ ) . '/queue-tabs.php';
-require_once dirname( __FILE__ ) . '/map-pins-render.php';
 require_once dirname( __FILE__ ) . '/omeka-link.php';
 
 //[bannerstrip ]
@@ -115,19 +114,3 @@ function riches_category_row( $atts ) {
 
 add_shortcode( 'riches_category_row', 'riches_category_row' );
 
-/**
- * [riches_map slug="community" height="420px" full_width="1"]
- *
- * Embeds a RICHES Leaflet map configured under RICHES Maps in the admin.
- * Use slug= (or map= / id=) matching the map post’s URL slug.
- * full_width="1" (or true/yes/on): edge-to-edge viewport width; no bottom margin on the map block.
- * In the block editor: add a Shortcode block and paste the code from the map edit screen.
- *
- * @param array $atts Shortcode attributes.
- * @return string
- */
-function riches_map_shortcode_handler( $atts ) {
-	return riches_map_shortcode( $atts );
-}
-
-add_shortcode( 'riches_map', 'riches_map_shortcode_handler' );
