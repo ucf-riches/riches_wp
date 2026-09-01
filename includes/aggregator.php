@@ -32,7 +32,7 @@ if ( ! defined( 'RICHES_AGGREGATOR_TEMPLATE' ) ) {
 /**
  * Register the ACF field groups: the page config and the post sort field.
  *
- * No-op if ACF is inactive. Mirrors includes/omeka-link.php and the riches-map plugin's includes/acf-fields.php.
+ * No-op if ACF is inactive. Mirrors includes/omeka-link.php and the leaflet-pinner plugin's includes/acf-fields.php.
  */
 function riches_register_aggregator_fields() {
 	if ( ! function_exists( 'acf_add_local_field_group' ) ) {

@@ -26,7 +26,7 @@ adds and overrides behavior through hooks, filters, and template overrides
 without touching the parent.
 
 > **Maps:** the Leaflet map feature (`[riches_map]`, RICHES Maps / Map Pins post
-> types) lives in the plugin `wp-content/plugins/riches-map/`, not in this theme.
+> types) lives in the plugin `wp-content/plugins/leaflet-pinner/`, not in this theme.
 > Style overrides only, via `.riches-map` selectors in `src/css/`.
 
 ### Entry points

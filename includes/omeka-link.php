@@ -196,7 +196,7 @@ function riches_render_omeka_bar( $post_id ) {
 /**
  * Register the per-post ACF override fields (URL + link text).
  *
- * Mirrors the pattern in the riches-map plugin's includes/acf-fields.php. No-op if ACF is inactive.
+ * Mirrors the pattern in the leaflet-pinner plugin's includes/acf-fields.php. No-op if ACF is inactive.
  */
 function riches_register_omeka_field_group() {
 	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
