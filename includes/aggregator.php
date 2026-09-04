@@ -382,6 +382,8 @@ function riches_render_aggregator( $args = array() ) {
 		);
 	}
 	$q = new WP_Query( $query_args );
+	// One query for every attachment post + one for their meta, instead of two per card.
+	update_post_thumbnail_cache( $q );
 
 	if ( ! $q->have_posts() ) {
 		wp_reset_postdata();

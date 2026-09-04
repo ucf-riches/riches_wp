@@ -108,6 +108,7 @@ function riches_render_category_queue( $args ) {
 			'posts_per_page' => $posts_per_page,
 		)
 	);
+	update_post_thumbnail_cache( $q );
 
 	ob_start();
 
