@@ -1,16 +1,12 @@
 <?php
 /**
- * Aggregator page template support.
+ * Aggregator page template rendering.
  *
- * Provides:
- *   - Page-scoped ACF config: a base category (pool = that term + descendants),
- *     a search toggle, a repeater of modular taxonomy "filter" facets, and an
- *     opt-in set of sort options.
- *   - One post ACF field (date recorded) used as a structured sort key.
- *   - riches_render_aggregator(): loads the pool as cards carrying generalized
- *     data-* attributes, preceded by a control bar whose search box, filter
- *     dropdowns, and sort options render ONLY when the page configures them.
- *   - Conditional enqueue of the client-side filter/sort script on the template.
+ * The ACF configuration groups and source-resolution helpers live in the
+ * riches-core plugin (includes/aggregator-fields.php). This file provides
+ * riches_render_aggregator(), which reads that configuration and renders the
+ * control bar plus the pooled posts as cards, and the conditional enqueue of
+ * the client-side filter/sort script.
  *
  * Filtering/sorting stays fully client-side (no AJAX); see
  * static/js/riches-aggregator-filter.js.
@@ -22,269 +18,11 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The page template filename. Must match the actual template file, the ACF
- * page_template location rule, and the asset enqueue gate.
+ * Fallback for the template filename when riches-core is inactive. The plugin
+ * loads first and defines the canonical value.
  */
 if ( ! defined( 'RICHES_AGGREGATOR_TEMPLATE' ) ) {
 	define( 'RICHES_AGGREGATOR_TEMPLATE', 'template-aggregator.php' );
-}
-
-/**
- * Register the ACF field groups: the page config and the post sort field.
- *
- * No-op if ACF is inactive. Mirrors includes/omeka-link.php and the leaflet-pinner plugin's includes/acf-fields.php.
- */
-function riches_register_aggregator_fields() {
-	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
-		return;
-	}
-
-	// Group A: per-page configuration for what this aggregator pools, filters, and sorts.
-	acf_add_local_field_group(
-		array(
-			'key'                   => 'group_riches_aggregator_page',
-			'title'                 => __( 'Aggregator', 'UCF-WordPress-Theme-child-RICHES' ),
-			'fields'                => array(
-				array(
-					'key'           => 'field_riches_agg_category',
-					'label'         => __( 'Base category', 'UCF-WordPress-Theme-child-RICHES' ),
-					'name'          => 'riches_agg_category',
-					'type'          => 'taxonomy',
-					'taxonomy'      => 'category',
-					'field_type'    => 'select',
-					'add_term'      => 0,
-					'save_terms'    => 0, // do NOT make the page a member of the category
-					'load_terms'    => 0,
-					'return_format' => 'object',
-					'allow_null'    => 1,
-					'required'      => 0,
-					'instructions'  => __( 'The pool: this category and all of its child categories. Ignored on the Posts page, which pools all posts.', 'UCF-WordPress-Theme-child-RICHES' ),
-				),
-				array(
-					'key'           => 'field_riches_agg_show_search',
-					'label'         => __( 'Show search box', 'UCF-WordPress-Theme-child-RICHES' ),
-					'name'          => 'riches_agg_show_search',
-					'type'          => 'true_false',
-					'ui'            => 1,
-					'default_value' => 1,
-					'instructions'  => __( 'A text box that searches entry titles and their term labels.', 'UCF-WordPress-Theme-child-RICHES' ),
-				),
-				array(
-					'key'          => 'field_riches_agg_filters',
-					'label'        => __( 'Filter dropdowns', 'UCF-WordPress-Theme-child-RICHES' ),
-					'name'         => 'riches_agg_filters',
-					'type'         => 'repeater',
-					'layout'       => 'table',
-					'button_label' => __( 'Add filter', 'UCF-WordPress-Theme-child-RICHES' ),
-					'instructions' => __( 'Each row adds one dropdown to the live filter bar. A dropdown appears only if the pool actually contains matching terms.', 'UCF-WordPress-Theme-child-RICHES' ),
-					'sub_fields'   => array(
-						array(
-							'key'          => 'field_riches_agg_filter_label',
-							'label'        => __( 'Label', 'UCF-WordPress-Theme-child-RICHES' ),
-							'name'         => 'label',
-							'type'         => 'text',
-							'required'     => 1,
-							'instructions' => __( 'Shown above the dropdown, e.g. "Collections".', 'UCF-WordPress-Theme-child-RICHES' ),
-						),
-						array(
-							'key'          => 'field_riches_agg_filter_source',
-							'label'        => __( 'Filter source', 'UCF-WordPress-Theme-child-RICHES' ),
-							'name'         => 'source',
-							'type'         => 'select',
-							'ui'           => 1,
-							'required'     => 1,
-							'choices'      => array(), // populated in riches_agg_filter_source_choices()
-							'instructions' => __( 'A whole taxonomy ("All Categories/Tags") or the sub-terms of a nested parent.', 'UCF-WordPress-Theme-child-RICHES' ),
-						),
-						array(
-							'key'          => 'field_riches_agg_filter_sortable',
-							'label'        => __( 'Sortable', 'UCF-WordPress-Theme-child-RICHES' ),
-							'name'         => 'sortable',
-							'type'         => 'true_false',
-							'ui'           => 1,
-							'instructions' => __( 'Also offer "Sort by this label" (alphabetical by term).', 'UCF-WordPress-Theme-child-RICHES' ),
-						),
-					),
-				),
-				array(
-					'key'           => 'field_riches_agg_sorts',
-					'label'         => __( 'Sort options', 'UCF-WordPress-Theme-child-RICHES' ),
-					'name'          => 'riches_agg_sorts',
-					'type'          => 'checkbox',
-					'choices'       => array(
-						'title'         => __( 'Title (A–Z)', 'UCF-WordPress-Theme-child-RICHES' ),
-						'published'     => __( 'Date posted', 'UCF-WordPress-Theme-child-RICHES' ),
-						'date_recorded' => __( 'Date recorded', 'UCF-WordPress-Theme-child-RICHES' ),
-					),
-					'default_value' => array( 'title', 'date_recorded' ),
-					'instructions'  => __( 'Which sort keys the live "Sort by" dropdown offers. Sortable filters (above) are added automatically.', 'UCF-WordPress-Theme-child-RICHES' ),
-				),
-			),
-			'location'              => array(
-				// Aggregator template pages …
-				array(
-					array(
-						'param'    => 'post_type',
-						'operator' => '==',
-						'value'    => 'page',
-					),
-					array(
-						'param'    => 'page_template',
-						'operator' => '==',
-						'value'    => RICHES_AGGREGATOR_TEMPLATE,
-					),
-				),
-				// … OR the blog "Posts page" (Settings → Reading), rendered by home.php.
-				array(
-					array(
-						'param'    => 'page_type',
-						'operator' => '==',
-						'value'    => 'posts_page',
-					),
-				),
-			),
-			'position'              => 'acf_after_title',
-			'style'                 => 'default',
-			'label_placement'       => 'top',
-			'instruction_placement' => 'label',
-		)
-	);
-
-	// Group B: the one structured post field used as a sort key.
-	acf_add_local_field_group(
-		array(
-			'key'                   => 'group_riches_aggregator_post',
-			'title'                 => __( 'Aggregator metadata', 'UCF-WordPress-Theme-child-RICHES' ),
-			'fields'                => array(
-				array(
-					'key'            => 'field_riches_date_recorded',
-					'label'          => __( 'Date recorded', 'UCF-WordPress-Theme-child-RICHES' ),
-					'name'           => 'riches_date_recorded',
-					'type'           => 'date_picker',
-					'display_format' => 'F j, Y',
-					'return_format'  => 'Ymd',
-					'first_day'      => 0,
-					'instructions'   => __( 'When the item was recorded/created. Used as a sort key on aggregator pages.', 'UCF-WordPress-Theme-child-RICHES' ),
-				),
-			),
-			'location'              => array(
-				array(
-					array(
-						'param'    => 'post_type',
-						'operator' => '==',
-						'value'    => 'post',
-					),
-				),
-			),
-			'position'              => 'acf_after_title',
-			'style'                 => 'default',
-			'label_placement'       => 'top',
-			'instruction_placement' => 'label',
-		)
-	);
-}
-add_action( 'acf/init', 'riches_register_aggregator_fields' );
-
-/**
- * Populate the "Filter source" select with real dropdown choices.
- *
- * Offers, per public taxonomy: a whole-taxonomy option ("All <Label>",
- * value "tax:<name>") and, for every hierarchical term that has children,
- * a nested-parent option ("<Label> › <Term> (children)", value "term:<id>").
- *
- * @param array $field The ACF field being loaded.
- * @return array
- */
-function riches_agg_filter_source_choices( $field ) {
-	$choices    = array();
-	$taxonomies = get_taxonomies( array( 'public' => true ), 'objects' );
-	$exclude    = array( 'post_format' );
-
-	foreach ( $taxonomies as $tax ) {
-		if ( in_array( $tax->name, $exclude, true ) ) {
-			continue;
-		}
-
-		$choices[ 'tax:' . $tax->name ] = sprintf(
-			/* translators: %s: taxonomy plural label */
-			__( 'All %s', 'UCF-WordPress-Theme-child-RICHES' ),
-			$tax->labels->name
-		);
-
-		if ( ! $tax->hierarchical ) {
-			continue;
-		}
-
-		$terms = get_terms(
-			array(
-				'taxonomy'   => $tax->name,
-				'hide_empty' => false,
-			)
-		);
-		if ( is_wp_error( $terms ) ) {
-			continue;
-		}
-		foreach ( $terms as $term ) {
-			$children = get_term_children( $term->term_id, $tax->name );
-			if ( empty( $children ) ) {
-				continue; // only terms that can scope sub-terms are useful as a parent
-			}
-			$choices[ 'term:' . $term->term_id ] = sprintf(
-				/* translators: 1: taxonomy label, 2: term name */
-				__( '%1$s › %2$s (children)', 'UCF-WordPress-Theme-child-RICHES' ),
-				$tax->labels->singular_name,
-				$term->name
-			);
-		}
-	}
-
-	$field['choices'] = $choices;
-	return $field;
-}
-add_filter( 'acf/load_field/key=field_riches_agg_filter_source', 'riches_agg_filter_source_choices' );
-
-/**
- * Small guarded ACF read helper.
- *
- * @param string $name    Field name.
- * @param int    $post_id Post ID.
- * @return mixed Field value, or '' when ACF is inactive.
- */
-function riches_aggregator_field( $name, $post_id ) {
-	if ( ! function_exists( 'get_field' ) ) {
-		return '';
-	}
-	return get_field( $name, $post_id );
-}
-
-/**
- * Resolve a "Filter source" value into a taxonomy + optional parent scope.
- *
- * @param string $source Stored value: "tax:<name>" or "term:<id>".
- * @return array|null { taxonomy: string, parent_id: int } or null if invalid.
- */
-function riches_agg_resolve_source( $source ) {
-	$source = (string) $source;
-
-	if ( 0 === strpos( $source, 'tax:' ) ) {
-		$tax = substr( $source, 4 );
-		return taxonomy_exists( $tax ) ? array(
-			'taxonomy'  => $tax,
-			'parent_id' => 0,
-		) : null;
-	}
-
-	if ( 0 === strpos( $source, 'term:' ) ) {
-		$term = get_term( (int) substr( $source, 5 ) );
-		if ( $term instanceof WP_Term ) {
-			return array(
-				'taxonomy'  => $term->taxonomy,
-				'parent_id' => (int) $term->term_id,
-			);
-		}
-	}
-
-	return null;
 }
 
 /**
@@ -305,6 +43,13 @@ function riches_agg_resolve_source( $source ) {
  * @return string HTML fragment (already escaped internally).
  */
 function riches_render_aggregator( $args = array() ) {
+	if ( ! function_exists( 'riches_agg_resolve_source' ) || ! function_exists( 'riches_aggregator_field' ) ) {
+		if ( current_user_can( 'edit_pages' ) ) {
+			return '<p class="text-muted">' . esc_html__( 'Aggregator: activate the RICHES Core plugin to configure and render this page.', 'UCF-WordPress-Theme-child-RICHES' ) . '</p>';
+		}
+		return '';
+	}
+
 	$args = wp_parse_args(
 		$args,
 		array(
