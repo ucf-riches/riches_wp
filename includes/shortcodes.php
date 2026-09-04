@@ -8,7 +8,6 @@
 
 require_once dirname( __FILE__ ) . '/category-queue.php';
 require_once dirname( __FILE__ ) . '/queue-tabs.php';
-require_once dirname( __FILE__ ) . '/omeka-link.php';
 
 //[bannerstrip ]
 function insert_bannerstrip( $atts ) {

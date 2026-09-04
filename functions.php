@@ -13,5 +13,6 @@ include_once __DIR__ . '/includes/header-functions.php';
 include_once __DIR__ . '/includes/nav-functions.php';
 include_once __DIR__ . '/includes/footer-functions.php';
 include_once __DIR__ . '/includes/config.php';
+include_once __DIR__ . '/includes/omeka-bar.php';
 include_once __DIR__ . '/includes/shortcodes.php';
 include_once __DIR__ . '/includes/aggregator.php';
