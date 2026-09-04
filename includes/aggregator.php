@@ -476,7 +476,7 @@ function riches_render_aggregator( $args = array() ) {
 					'large',
 					array(
 						'class'   => 'card-img-top',
-						// Core only auto-lazy-loads inside the main loop; this is a secondary query.
+						// home.php never runs the main loop, so core treats every image here as above the fold and adds no loading attribute (see wp_get_loading_optimization_attributes, the before_loop rule); set it explicitly, exempting the first row.
 						'loading' => ( $card_index <= 3 ) ? false : 'lazy',
 					)
 				);
