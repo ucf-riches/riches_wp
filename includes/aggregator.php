@@ -392,8 +392,10 @@ function riches_render_aggregator( $args = array() ) {
 
 	// Buffer the cards first so the control bar can list the terms actually present.
 	ob_start();
+	$card_index = 0;
 	while ( $q->have_posts() ) :
 		$q->the_post();
+		$card_index++;
 		$pid    = get_the_ID();
 		$f_date = (string) riches_aggregator_field( 'riches_date_recorded', $pid ); // 'Ymd' or ''
 
@@ -469,7 +471,16 @@ function riches_render_aggregator( $args = array() ) {
 					<p class="card-text text-muted"><?php echo esc_html( '' !== $date_human ? $date_human : get_the_time( 'F j, Y' ) ); ?></p>
 				</div>
 			<?php else : ?>
-				<?php the_post_thumbnail( 'large', array( 'class' => 'card-img-top' ) ); ?>
+				<?php
+				the_post_thumbnail(
+					'large',
+					array(
+						'class'   => 'card-img-top',
+						// Core only auto-lazy-loads inside the main loop; this is a secondary query.
+						'loading' => ( $card_index <= 3 ) ? false : 'lazy',
+					)
+				);
+				?>
 				<?php riches_render_omeka_bar( get_the_ID() ); ?>
 				<div class="card-block">
 					<h4 class="card-title">
