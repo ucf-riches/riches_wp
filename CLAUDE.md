@@ -44,6 +44,7 @@ without touching the parent.
 | `functions.php` | Wires all `includes/` files via `include_once` |
 | `style.css` | Theme declaration header; minimal base styles |
 | `footer.php` | Child footer override |
+| `home.php` | Posts page (blog index) rendered with the aggregator cards and filter bar |
 | `template-home.php` | "Home" page template |
 | `template-home-aggregate.php` | Legacy home-aggregate page template |
 | `template-aggregator.php` | Aggregator page template (category + filter/sort) |
@@ -85,7 +86,7 @@ When making CSS changes:
 Assets live in `static/js/`. All scripts are **vanilla ES5 IIFEs** — no jQuery,
 no build step, no transpiler. Enqueued conditionally via `wp_register_script` at
 priority 5 and `wp_enqueue_script` at priority 20 (gated by
-`is_page_template()`), versioned with `filemtime()`.
+`is_page_template()` or `is_home()`), versioned with `filemtime()`.
 
 | File | Purpose |
 |------|---------|
@@ -103,7 +104,11 @@ priority 5 and `wp_enqueue_script` at priority 20 (gated by
   - Lint: `docker exec <id> php -l <container-path>`
   - Runtime: bootstrap `wp-load.php` in a throwaway script, remove it immediately
     after. Never leave harness scripts in the theme.
+  - End-to-end: `bash wp-content/plugins/riches-core/tests/run.sh` runs the smoke tests (PHP in the container, HTTP checks on the host); run it after any theme change.
 - **Commit or push only when the user asks.**
 - Wire new `includes/*.php` modules via `include_once` in `functions.php`.
 - Prefix all globals: `riches_*` (functions/vars), `group_riches_*` (ACF groups),
   `field_riches_*` (ACF fields), `riches-*` (CSS classes, asset handles).
+- **Deploy with riches-core.** The theme and `wp-content/plugins/riches-core/`
+  ship together; see the plugin README's Deployment section for the order
+  (theme first, then activate the plugin).

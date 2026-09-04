@@ -27,9 +27,6 @@ Tabs: add reduced="1" on the wrapper to drop the in-panel category footer link o
 
 Standalone row without h2 / footer link:
 [riches_category_row category="oral-history" label="Oral Histories" reduced="1"]
-
-If you render [riches_queue_tabs] only via do_shortcode in PHP (not in post content), add for body_class:
-add_filter( 'riches_queue_tabs_force_enqueue', '__return_true' );
 */
 ?>
 
