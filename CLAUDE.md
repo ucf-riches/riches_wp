@@ -29,6 +29,14 @@ without touching the parent.
 > types) lives in the plugin `wp-content/plugins/leaflet-pinner/`, not in this theme.
 > Style overrides only, via `.riches-map` selectors in `src/css/`.
 
+> **Data and hooks:** ACF field groups for posts and aggregator pages, the
+> YouTube featured-image sideloader, card link-bar resolution and its site
+> options, and the shortcodes `[bannerstrip]`, `[riches_category_row]`,
+> `[riches_queue_tabs]` live in `wp-content/plugins/riches-core/`. The theme
+> calls plugin functions behind `function_exists()` guards and renders a plain
+> page when the plugin is inactive. Plugin shortcodes call this theme's
+> `riches_render_*` functions when present.
+
 ### Entry points
 
 | File | Purpose |
@@ -44,22 +52,20 @@ without touching the parent.
 
 | File | Purpose |
 |------|---------|
-| `config.php` | Theme constants and configuration |
-| `header-functions.php` | ACF "Page Header Fields" group registration; common-banner fallback |
+| `config.php` | Theme constants, style enqueue, Font Awesome 5 forcing filter |
+| `header-functions.php` | Parent "Page Header Fields" ACF group registration; common-banner fallback |
 | `nav-functions.php` | Navigation / sticky-nav helpers |
 | `footer-functions.php` | Footer render helpers |
-| `shortcodes.php` | Shortcode registrations; `require`s `omeka-link.php` and `category-queue.php` |
-| `category-queue.php` | `riches_render_category_queue()` — card-deck renderer; YouTube branch |
-| `queue-tabs.php` | `[riches_queue_tabs]` tabbed wrapper over multiple category queues |
-| `omeka-link.php` | Omeka/external link bar (URL resolver, per-post overrides, Customizer settings) |
-| `aggregator.php` | Aggregator page template logic: ACF groups, `riches_render_aggregator()`, asset enqueue |
+| `category-queue.php` | `riches_render_category_queue()` — card-deck renderer used by the plugin's shortcodes |
+| `omeka-bar.php` | `riches_render_omeka_bar()` — card link-bar markup (URL/label come from riches-core) |
+| `aggregator.php` | `riches_render_aggregator()` and the filter-script enqueue (ACF config lives in riches-core) |
 
 ### `template-parts/`
 
 | File | Purpose |
 |------|---------|
 | `sticky-nav.php` | Sticky navigation bar partial |
-| `riches-queue-tabs.php` | Queue-tabs inner partial (consumed by `queue-tabs.php`) |
+| `riches-queue-tabs.php` | Queue-tabs inner partial (consumed by the riches-core plugin's queue-tabs shortcode) |
 
 ### CSS pipeline
 
