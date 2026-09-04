@@ -144,7 +144,9 @@ function riches_render_category_queue( $args ) {
 					 * below the fold never appear and the thumbnail branch is skipped.
 					 */
 					$_post_raw = get_post();
-					$yt_id     = riches_youtube_id_from_content( ( $_post_raw instanceof WP_Post ) ? $_post_raw->post_content : '' );
+					$yt_id     = ( function_exists( 'riches_youtube_id_from_content' ) && $_post_raw instanceof WP_Post )
+						? riches_youtube_id_from_content( $_post_raw->post_content )
+						: null;
 					?>
 					<div class="card">
 						<?php if ( $yt_id && RICHES_USE_YOUTUBE_CARD ) : ?>

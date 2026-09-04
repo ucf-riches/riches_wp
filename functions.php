@@ -1,33 +1,17 @@
-<?php 
+<?php
+/**
+ * Child theme bootstrap. Wires the includes/ modules.
+ *
+ * Data, hooks, and shortcodes live in the riches-core plugin; this theme only renders.
+ *
+ * @package UCF-WordPress-Theme-child-RICHES
+ */
 
-//Theme support
+defined( 'ABSPATH' ) || exit;
 
-
-include_once 'includes/header-functions.php';
-include_once 'includes/nav-functions.php';
-include_once 'includes/footer-functions.php';
-include_once 'includes/config.php';
-include_once 'includes/youtube-featured-image.php';
-include_once 'includes/shortcodes.php';
-include_once 'includes/aggregator.php';
-
-/*
-add_action('wp_enqueue_scripts', 'riches_theme_enqueue_style', 10, 0);
-function riches_theme_enqueue_style() {
-    wp_enqueue_style(
-        'parent-style',
-        get_template_directory_uri() . "style.css",
-        []
-        filemtime(get_template_directory() . "style.css",
-        'all'
-    );
-
-    wp_enqueue_style(
-        'child-style',
-        get_stylesheet_directory_uri() . "style.css",
-        ['parent-style'],
-        filemtime(get_stylesheet_directory() . "style.css"),
-        'all'
-    );
-}*/
-?>
+include_once __DIR__ . '/includes/header-functions.php';
+include_once __DIR__ . '/includes/nav-functions.php';
+include_once __DIR__ . '/includes/footer-functions.php';
+include_once __DIR__ . '/includes/config.php';
+include_once __DIR__ . '/includes/shortcodes.php';
+include_once __DIR__ . '/includes/aggregator.php';
