@@ -5,52 +5,7 @@
  * @package UCF-WordPress-Theme-child-RICHES
  */
 
-/**
- * Whether a shortcode attribute enables "reduced" layout (no category title row / extra links).
- *
- * @param mixed $value Raw attribute value.
- * @return bool
- */
-function riches_shortcode_reduced_flag( $value ) {
-	if ( null === $value || '' === $value || false === $value ) {
-		return false;
-	}
-	if ( true === $value || 1 === $value || '1' === $value ) {
-		return true;
-	}
-	if ( is_string( $value ) ) {
-		return in_array( strtolower( trim( $value ) ), array( '1', 'true', 'yes', 'on', 'reduced' ), true );
-	}
-	return (bool) $value;
-}
-
-/**
- * Parse a truthy/falsy shortcode attribute, returning $default when unset/blank.
- *
- * Accepts 1/true/yes/on (true) and 0/false/no/off (false), case-insensitive.
- *
- * @param mixed $value   Raw attribute value.
- * @param bool  $default Value to use when the attribute is absent or empty.
- * @return bool
- */
-function riches_shortcode_bool_flag( $value, $default = true ) {
-	if ( null === $value || '' === $value ) {
-		return $default;
-	}
-	if ( is_bool( $value ) ) {
-		return $value;
-	}
-	if ( is_string( $value ) ) {
-		$v = strtolower( trim( $value ) );
-		if ( in_array( $v, array( '0', 'false', 'no', 'off' ), true ) ) {
-			return false;
-		}
-		if ( in_array( $v, array( '1', 'true', 'yes', 'on' ), true ) ) {
-			return true;
-		}
-	}
-	return (bool) $value;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Render a category queue as a card deck (and optional section heading).
